@@ -51,7 +51,7 @@ public class CalculatorController {
     }
 
     private String formatResult(double result) {
-        DecimalFormat decimalFormat = new DecimalFormat("#.######"); // adjust the format as needed
+        DecimalFormat decimalFormat = new DecimalFormat("#.######"); 
         return decimalFormat.format(result);
     }
 
