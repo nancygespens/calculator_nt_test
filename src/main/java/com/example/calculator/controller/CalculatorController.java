@@ -1,3 +1,4 @@
+// CalculatorController.java
 package com.example.calculator.controller;
 
 import com.example.calculator.model.CalculatorRequest;
@@ -7,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @RestController
@@ -16,8 +19,8 @@ public class CalculatorController {
     @PostMapping("/calculate")
     public ResponseEntity<Map<String, String>> calculate(@RequestBody CalculatorRequest request) {
         try {
-            double number1 = Double.parseDouble(request.getNumber_1());
-            double number2 = Double.parseDouble(request.getNumber_2());
+            double number1 = parseNumber(request.getNumber_1());
+            double number2 = parseNumber(request.getNumber_2());
             String operation = request.getOperation();
             double result;
 
@@ -46,13 +49,23 @@ public class CalculatorController {
             response.put("result", formatResult(result));
             return ResponseEntity.ok(response);
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body(createErrorResponse("Invalid number format"));
+            return ResponseEntity.badRequest().body(createErrorResponse("Invalid number format. Are you trying to break my calculator with such a long number? О_о"));
         }
     }
 
+    private double parseNumber(String number) {
+        // Проверка на допустимость значения перед его парсингом
+        if (!number.matches("-?\\d+(\\.\\d+)?")) {
+            throw new NumberFormatException();
+        }
+        return Double.parseDouble(number.replace(",", ".")); // Заменяем запятую на точку, если есть
+    }
+
     private String formatResult(double result) {
-        DecimalFormat decimalFormat = new DecimalFormat("#.######"); 
-        return decimalFormat.format(result);
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
+        symbols.setDecimalSeparator('.');
+        DecimalFormat format = new DecimalFormat("#.############", symbols); // Ограничиваем количество знаков после запятой
+        return format.format(result);
     }
 
     private Map<String, String> createErrorResponse(String errorMessage) {
