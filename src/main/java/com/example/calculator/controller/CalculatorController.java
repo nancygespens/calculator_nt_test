@@ -1,4 +1,3 @@
-// CalculatorController.java
 package com.example.calculator.controller;
 
 import com.example.calculator.model.CalculatorRequest;
@@ -19,9 +18,14 @@ public class CalculatorController {
     @PostMapping("/calculate")
     public ResponseEntity<Map<String, String>> calculate(@RequestBody CalculatorRequest request) {
         try {
+            if (request.getNumber_1() == null || request.getNumber_2() == null || request.getOperation() == null) {
+                return ResponseEntity.badRequest().body(createErrorResponse("Missing required fields. Are you trying to confuse my calculator? >.<"));
+            }
+
             double number1 = parseNumber(request.getNumber_1());
             double number2 = parseNumber(request.getNumber_2());
             String operation = request.getOperation();
+
             double result;
 
             switch (operation) {
@@ -49,22 +53,26 @@ public class CalculatorController {
             response.put("result", formatResult(result));
             return ResponseEntity.ok(response);
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body(createErrorResponse("Invalid number format. Are you trying to break my calculator with such a long number? О_о"));
+            return ResponseEntity.badRequest().body(createErrorResponse("Invalid number format. Are you trying to break my calculator with such a long number?"));
         }
     }
 
     private double parseNumber(String number) {
+        // Заменяем запятую на точку, если есть
+        String formattedNumber = number.replace(",", ".");
+
         // Проверка на допустимость значения перед его парсингом
-        if (!number.matches("-?\\d+(\\.\\d+)?")) {
+        if (!formattedNumber.matches("-?\\d+(\\.\\d+)?")) {
             throw new NumberFormatException();
         }
-        return Double.parseDouble(number.replace(",", ".")); // Заменяем запятую на точку, если есть
+
+        return Double.parseDouble(formattedNumber);
     }
 
     private String formatResult(double result) {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
         symbols.setDecimalSeparator('.');
-        DecimalFormat format = new DecimalFormat("#.############", symbols); // Ограничиваем количество знаков после запятой
+        DecimalFormat format = new DecimalFormat("#.############", symbols);
         return format.format(result);
     }
 
