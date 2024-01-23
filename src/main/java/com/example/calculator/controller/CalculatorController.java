@@ -53,7 +53,7 @@ public class CalculatorController {
             response.put("result", formatResult(result));
             return ResponseEntity.ok(response);
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body(createErrorResponse("Invalid number format. Are you trying to break my calculator with such a long number?"));
+            return ResponseEntity.badRequest().body(createErrorResponse("Invalid number format. Are you trying to break my calculator with such a long number? О.о"));
         }
     }
 
